@@ -1,12 +1,13 @@
 #include <iostream>
 #include <windows.h>
-#include "Key.h"
+#include "Sword.h"
 
-void Key::Draw()
+void Sword::Draw()
 {
+	int var = 06;
 	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(console, (int)m_color);
 
-	std::cout << "+";
+	std::cout << (char)var;
 	SetConsoleTextAttribute(console, (int)ActorColor::Regular);
 }

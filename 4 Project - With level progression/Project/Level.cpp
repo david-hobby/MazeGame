@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Key.h"
+#include "Sword.h"
 #include "Door.h"
 #include "Goal.h"
 #include "Money.h"
@@ -139,6 +140,10 @@ bool Level::ConvertLevel(int* playerX, int* playerY)
 				m_pLevelData[index] = ' ';
 				m_pActors.push_back(new Key(x, y, ActorColor::Blue));
 				break;
+			case 'V':
+				m_pLevelData[index] = ' ';
+				m_pActors.push_back(new Sword(x, y, ActorColor::Aqua));
+				break;
 			case 'R':
 				m_pLevelData[index] = ' ';
 				m_pActors.push_back(new Door(x, y, ActorColor::Red, ActorColor::SolidRed));
@@ -167,6 +172,10 @@ bool Level::ConvertLevel(int* playerX, int* playerY)
 					*playerY = y;
 				}
 				break;
+			case 'v':
+				m_pActors.push_back(new Enemy(x, y, 0, 3));
+				m_pLevelData[index] = ' '; // clear the level
+				break;
 			case 'e':
 				m_pActors.push_back(new Enemy(x, y));
 				m_pLevelData[index] = ' '; // clear the level
@@ -175,16 +184,10 @@ bool Level::ConvertLevel(int* playerX, int* playerY)
 				m_pActors.push_back(new Enemy(x, y, 3, 0));
 				m_pLevelData[index] = ' '; // clear the level
 				break;
-			case 'v':
-				m_pLevelData[index] = ' ';
-				m_pActors.push_back(new Enemy(x, y, 0, 2));
-				m_pLevelData[index] = ' '; // clear the level
-				break;
-				break;
 			case ' ':
 				break;
 			default:
-				cout << "Invalid character in level file: " << m_pLevelData[index] << endl;
+				cout << "Invalid character in level file:XXXX " << m_pLevelData[index] << endl;
 				anyWarnings = true;
 				break;
 			}
@@ -200,21 +203,46 @@ int Level::GetIndexFromCoordinates(int x, int y)
 }
 
 // Updates all actors and returns a colliding actor if there is one
-PlacableActor* Level::UpdateActors(int x, int y)
+PlaceableActor* Level::UpdateActors(int x, int y)
 {
-	PlacableActor* collidedActor = nullptr;
+	PlaceableActor* collidedActor = nullptr;
 
 	for (auto actor = m_pActors.begin(); actor != m_pActors.end(); ++actor)
 	{
+		
 		(*actor)->Update(); // Update all actors
-
 		if (x == (*actor)->GetXPosition() && y == (*actor)->GetYPosition())
 		{
 			// should only be able to collide with one actor
 			assert(collidedActor == nullptr);
 			collidedActor = (*actor);
 		}
+		
 	}
 
 	return collidedActor;
+}
+
+void Level::SlayActors(int x, int y)
+{
+	PlaceableActor* collidedActor = nullptr;
+
+	for (auto actor = m_pActors.begin(); actor != m_pActors.end(); ++actor)
+	{
+		if (x == (*actor)->GetXPosition() && y == (*actor)->GetYPosition())
+		{
+			if (collidedActor)
+			{
+				Enemy* collidedEnemy = dynamic_cast<Enemy*>(collidedActor);
+				assert(collidedEnemy);
+				collidedEnemy->Remove();
+			}
+			// should only be able to collide with one actor
+			assert(collidedActor == nullptr);
+			collidedActor = (*actor);
+		}
+		(*actor)->Update(); // Update all actors
+	}
+	
+	
 }

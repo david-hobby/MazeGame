@@ -2,6 +2,7 @@
 
 #include "Player.h"
 #include "Key.h"
+#include "Sword.h"
 #include "AudioManager.h"
 
 using namespace std;
@@ -9,12 +10,18 @@ using namespace std;
 constexpr int kStartingNumberOfLives = 3;
 
 Player::Player()
-	: PlacableActor(0, 0)
+	: PlaceableActor(0, 0)
 	, m_pCurrentKey(nullptr)
 	, m_money(0)
 	, m_lives(kStartingNumberOfLives)
+	, m_pSword(nullptr)
 {
 
+}
+
+bool Player::HasSword()
+{
+	return m_pSword != nullptr;
 }
 
 bool Player::HasKey()
@@ -24,12 +31,17 @@ bool Player::HasKey()
 
 bool Player::HasKey(ActorColor color)
 {
-	return true;// HasKey() && m_pCurrentKey->GetColor() == color;
+	return HasKey() && m_pCurrentKey->GetColor() == color;
 }
 
 void Player::PickupKey(Key* key)
 {
 	m_pCurrentKey = key;
+}
+
+void Player::PickupSword(Sword* sword)
+{
+	m_pSword = sword;
 }
 
 void Player::UseKey()

@@ -1,5 +1,4 @@
 #include "GameplayState.h"
-
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
@@ -7,6 +6,7 @@
 
 #include "Enemy.h"
 #include "Key.h"
+#include "Sword.h"
 #include "Door.h"
 #include "Money.h"
 #include "Goal.h"
@@ -30,6 +30,7 @@ GameplayState::GameplayState(StateMachineExampleGame* pOwner)
 	, m_currentLevel(0)
 	, m_pLevel(nullptr)
 {
+	m_LevelNames.push_back("Level4.txt");
 	m_LevelNames.push_back("Level1.txt");
 	m_LevelNames.push_back("Level2.txt");
 	m_LevelNames.push_back("Level3.txt");
@@ -75,25 +76,41 @@ bool GameplayState::Update(bool processInput)
 			arrowInput = _getch();
 		}
 
-		if ((input == kArrowInput && arrowInput == kLeftArrow) ||
-			(char)input == 'A' || (char)input == 'a')
+		if ((input == kArrowInput && arrowInput == kLeftArrow) || (char)input == 'a')
 		{
 			newPlayerX--;
 		}
-		else if ((input == kArrowInput && arrowInput == kRightArrow) ||
-			(char)input == 'D' || (char)input == 'd')
+		else if ((input == kArrowInput && arrowInput == kRightArrow) || (char)input == 'd')
 		{
 			newPlayerX++;
 		}
-		else if ((input == kArrowInput && arrowInput == kUpArrow) ||
-			(char)input == 'W' || (char)input == 'w')
+		else if ((input == kArrowInput && arrowInput == kUpArrow) || (char)input == 'w')
 		{
 			newPlayerY--;
 		}
-		else if ((input == kArrowInput && arrowInput == kDownArrow) ||
-			(char)input == 'S' || (char)input == 's')
+		else if ((input == kArrowInput && arrowInput == kDownArrow) || (char)input == 's')
 		{
 			newPlayerY++;
+		}
+		else if ((char)input == 'S' && m_player.HasSword())
+		{
+			AudioManager::GetInstance()->PlayDoorOpenSound();
+			m_pLevel->SlayActors(newPlayerX, newPlayerY + 1);
+		}
+		else if ((char)input == 'W' && m_player.HasSword())
+		{
+			AudioManager::GetInstance()->PlayDoorOpenSound();
+			m_pLevel->SlayActors(newPlayerX, newPlayerY - 1);
+		}
+		else if ((char)input == 'A' && m_player.HasSword())
+		{
+			AudioManager::GetInstance()->PlayDoorOpenSound();
+			m_pLevel->SlayActors(newPlayerX - 1, newPlayerY);
+		}
+		else if ((char)input == 'D' && m_player.HasSword())
+		{
+			AudioManager::GetInstance()->PlayDoorOpenSound();
+			m_pLevel->SlayActors(newPlayerX + 1, newPlayerY);
 		}
 		else if (input == kEscapeKey)
 		{
@@ -144,7 +161,7 @@ bool GameplayState::Update(bool processInput)
 
 void GameplayState::HandleCollision(int newPlayerX, int newPlayerY)
 {
-	PlacableActor* collidedActor = m_pLevel->UpdateActors(newPlayerX, newPlayerY);
+	PlaceableActor* collidedActor = m_pLevel->UpdateActors(newPlayerX, newPlayerY);
 	if (collidedActor != nullptr && collidedActor->IsActive())
 	{
 		switch (collidedActor->GetType())
@@ -184,6 +201,19 @@ void GameplayState::HandleCollision(int newPlayerX, int newPlayerY)
 			{
 				m_player.PickupKey(collidedKey);
 				collidedKey->Remove();
+				m_player.SetPosition(newPlayerX, newPlayerY);
+				AudioManager::GetInstance()->PlayKeyPickupSound();
+			}
+			break;
+		}
+		case ActorType::Sword:
+		{
+			Sword* collidedSword = dynamic_cast<Sword*>(collidedActor);
+			assert(collidedSword);
+			if (!m_player.HasKey())
+			{
+				m_player.PickupSword(collidedSword);
+				collidedSword->Remove();
 				m_player.SetPosition(newPlayerX, newPlayerY);
 				AudioManager::GetInstance()->PlayKeyPickupSound();
 			}

@@ -1,8 +1,8 @@
 #pragma once
 #include "Point.h"
-
 enum class ActorColor
 {
+	Aqua = 3,
 	Regular = 7,
 	Blue = 9,
 	Green = 10,
@@ -19,14 +19,15 @@ enum class ActorType
 	Goal,
 	Key,
 	Money,
-	Player
+	Player,
+	Sword
 };
 
-class PlacableActor
+class PlaceableActor
 {
 public:
-	PlacableActor(int x, int y, ActorColor color = ActorColor::Regular);
-	virtual ~PlacableActor();
+	PlaceableActor(int x, int y, ActorColor color = ActorColor::Regular);
+	virtual ~PlaceableActor();
 
 	int GetXPosition();
 	int GetYPosition();
